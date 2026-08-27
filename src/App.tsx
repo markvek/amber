@@ -11,7 +11,7 @@ import { colors } from './edu-ui/tokens'
 function AppLayout() {
   return (
     <div style={{ display: 'flex', height: '100vh', backgroundColor: colors.background }}>
-      <GrainOverlay />
+      <GrainOverlay intensity={0.5} />
       <LeftSidebar />
       <main
         style={{
