@@ -127,7 +127,6 @@ export function EduGlobals() {
     <div
       style={{
         fontFamily: currentFontFamily,
-        backgroundColor: colors.background,
         color: colors.textPrimary,
         maxWidth: '960px',
         margin: '0 auto',
@@ -282,8 +281,8 @@ export function EduGlobals() {
 
       <Section title="Grain Overlay">
         <p style={{ fontSize: typography.sizes.sm, color: colors.textSecondary, marginBottom: spacing.md }}>
-          Paper-grain texture component (src/components/layout/GrainOverlay). Rendered app-wide over the
-          canvas and cards; intensity is adjustable.
+          Paper-grain texture component (src/components/layout/GrainOverlay). Rendered app-wide on the
+          page canvas, beneath cards and surfaces (which stay fully white); intensity is adjustable.
         </p>
         <div style={{ display: 'flex', flexWrap: 'wrap', gap: spacing.lg }}>
           {[0.15, 0.25, 0.5].map((intensity) => (

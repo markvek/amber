@@ -76,6 +76,8 @@ export function LeftSidebar() {
         padding: spacing.lg,
         overflowY: 'auto',
         flexShrink: 0,
+        position: 'relative',
+        zIndex: 1,
       }}
     >
       <div style={{ marginBottom: spacing.xl }}>

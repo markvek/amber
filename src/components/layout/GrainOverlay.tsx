@@ -13,9 +13,10 @@ export interface GrainOverlayProps {
 const noiseDataUri = `url('data:image/svg+xml;utf8,<svg xmlns="http://www.w3.org/2000/svg" width="100" height="100"><filter id="noise"><feTurbulence type="fractalNoise" baseFrequency="0.9" numOctaves="4" seed="2"/><feColorMatrix type="saturate" values="0"/></filter><rect width="100" height="100" filter="url(%23noise)"/></svg>')`
 
 /**
- * Paper-grain texture overlay. Renders above content with pointer-events
- * disabled and multiply blending, so it darkens/texturizes whatever is
- * beneath it — page canvas and cards alike — without blocking interaction.
+ * Paper-grain texture overlay with pointer-events disabled and multiply
+ * blending. Defaults to zIndex 9999 (grain over everything); pass
+ * style={{ zIndex: 0 }} and lift content siblings to zIndex 1 to texture
+ * only the page canvas while cards and surfaces stay clean.
  */
 export function GrainOverlay({
   intensity = 0.25,
