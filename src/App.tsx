@@ -1,36 +1,16 @@
-import { useState, type ReactNode } from 'react'
+import { BrowserRouter, Routes, Route, Navigate, Outlet } from 'react-router-dom'
 import { LeftSidebar } from './components/LeftSidebar'
 import { StudentBooksPage } from './pages/StudentBooksPage'
 import { StudentReadingPage } from './pages/StudentReadingPage'
 import { TeacherBooksPage } from './pages/TeacherBooksPage'
 import { TeacherAnalyticsPage } from './pages/TeacherAnalyticsPage'
 import { EduGlobals } from './pages/EduGlobals'
-import { type PageId } from './types/navigation'
 import { colors } from './edu-ui/tokens'
 
-function App() {
-  const [currentPage, setCurrentPage] = useState<PageId>('student-books')
-
-  function renderPage(pageId: PageId): ReactNode {
-    switch (pageId) {
-      case 'student-books':
-        return <StudentBooksPage />
-      case 'student-reading':
-        return <StudentReadingPage />
-      case 'teacher-books':
-        return <TeacherBooksPage />
-      case 'teacher-analytics':
-        return <TeacherAnalyticsPage />
-      case 'globals':
-        return <EduGlobals />
-      default:
-        return <StudentBooksPage />
-    }
-  }
-
+function AppLayout() {
   return (
     <div style={{ display: 'flex', height: '100vh', backgroundColor: colors.background }}>
-      <LeftSidebar currentPage={currentPage} onNavigate={setCurrentPage} />
+      <LeftSidebar />
       <main
         style={{
           flex: 1,
@@ -39,9 +19,26 @@ function App() {
           flexDirection: 'column',
         }}
       >
-        {renderPage(currentPage)}
+        <Outlet />
       </main>
     </div>
+  )
+}
+
+function App() {
+  return (
+    <BrowserRouter>
+      <Routes>
+        <Route element={<AppLayout />}>
+          <Route path="/student/books" element={<StudentBooksPage />} />
+          <Route path="/student/reading" element={<StudentReadingPage />} />
+          <Route path="/teacher/books" element={<TeacherBooksPage />} />
+          <Route path="/teacher/analytics" element={<TeacherAnalyticsPage />} />
+          <Route path="/globals" element={<EduGlobals />} />
+          <Route path="*" element={<Navigate to="/student/books" replace />} />
+        </Route>
+      </Routes>
+    </BrowserRouter>
   )
 }
 
