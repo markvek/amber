@@ -3,6 +3,7 @@ import { Button } from '../components/ui/Button'
 import { Label, Input, Card, CardHeader, CardTitle, CardContent, Badge, Textarea, Separator, Sheet, SheetTrigger, SheetContent, SheetHeader, SheetTitle, Popover, PopoverTrigger, PopoverContent, Collapsible, CollapsibleTrigger, CollapsibleContent } from '../components/ui'
 import { colors, typography, spacing, radii, shadows } from '../edu-ui/tokens'
 import { GrainOverlay } from '../components/layout/GrainOverlay'
+import { ListView } from '../components/data/ListView'
 
 type FontFamily = 'inter' | 'georgia' | 'opendyslexic'
 
@@ -203,6 +204,80 @@ export function EduGlobals() {
             </span>
           ))}
         </div>
+      </Section>
+
+      <Section title="List View">
+        <p style={{ fontSize: typography.sizes.sm, color: colors.textSecondary, marginBottom: spacing.md }}>
+          Standardized list (src/components/data/ListView): leading icon, title, right-aligned stat columns,
+          optional ⓘ popover, and row click for drill-down. Same component serves the student's book list
+          and the teacher's student roster.
+        </p>
+
+        <h3 style={{ fontSize: typography.sizes.md, fontWeight: typography.weights.medium, color: colors.textPrimary, marginBottom: spacing.sm }}>
+          Book list (student reader)
+        </h3>
+        <div style={{ marginBottom: spacing.lg }}>
+          <ListView
+            aria-label="Book list example"
+            onItemClick={(item) => console.log(`Drill down: ${item.title}`)}
+            items={[
+              {
+                id: 'book-1',
+                icon: '📕',
+                title: "Charlotte's Web",
+                subtitle: 'E.B. White',
+                stats: [
+                  { label: 'complete', value: '64%', progress: 64 },
+                  { label: 'avg speed', value: '182 wpm' },
+                ],
+                info: 'Assigned for Unit 3. Due Friday, Sep 12.',
+              },
+              {
+                id: 'book-2',
+                icon: '📗',
+                title: 'The Giver',
+                subtitle: 'Lois Lowry',
+                stats: [
+                  { label: 'complete', value: '12%', progress: 12 },
+                  { label: 'avg speed', value: '164 wpm' },
+                ],
+                info: 'Independent reading pick.',
+              },
+            ]}
+          />
+        </div>
+
+        <h3 style={{ fontSize: typography.sizes.md, fontWeight: typography.weights.medium, color: colors.textPrimary, marginBottom: spacing.sm }}>
+          Student roster (teacher view)
+        </h3>
+        <ListView
+          aria-label="Student roster example"
+          onItemClick={(item) => console.log(`Drill down: ${item.title}`)}
+          items={[
+            {
+              id: 'student-1',
+              icon: '🧑‍🎓',
+              title: 'Jordan Alvarez',
+              subtitle: 'Reading: The Giver',
+              stats: [
+                { label: 'complete', value: '78%', progress: 78 },
+                { label: 'avg speed', value: '201 wpm' },
+              ],
+              info: 'Up 14 wpm since last month.',
+            },
+            {
+              id: 'student-2',
+              icon: '🧑‍🎓',
+              title: 'Sam Osei',
+              subtitle: "Reading: Charlotte's Web",
+              stats: [
+                { label: 'complete', value: '35%', progress: 35 },
+                { label: 'avg speed', value: '148 wpm' },
+              ],
+              info: 'Missed the last two reading sessions.',
+            },
+          ]}
+        />
       </Section>
 
       <Section title="Grain Overlay">
