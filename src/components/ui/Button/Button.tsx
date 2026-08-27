@@ -1,4 +1,5 @@
 import { forwardRef, type ButtonHTMLAttributes } from 'react'
+import { colors } from '../../../edu-ui/tokens'
 
 export interface ButtonProps extends ButtonHTMLAttributes<HTMLButtonElement> {
   variant?: 'primary' | 'secondary' | 'danger'
@@ -17,16 +18,16 @@ export const Button = forwardRef<HTMLButtonElement, ButtonProps>(
 
     const variantStyles: Record<string, React.CSSProperties> = {
       primary: {
-        backgroundColor: '#3b82f6',
-        color: 'white',
+        backgroundColor: colors.primary,
+        color: colors.textInverse,
       },
       secondary: {
-        backgroundColor: '#6b7280',
-        color: 'white',
+        backgroundColor: colors.neutral500,
+        color: colors.textInverse,
       },
       danger: {
-        backgroundColor: '#ef4444',
-        color: 'white',
+        backgroundColor: colors.error,
+        color: colors.textInverse,
       },
     }
 
