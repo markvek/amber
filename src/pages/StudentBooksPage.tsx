@@ -1,6 +1,79 @@
+import { useNavigate } from 'react-router-dom'
 import { colors, typography, spacing } from '../edu-ui/tokens'
+import { ListView, type ListViewItem } from '../components/data/ListView'
+
+const books: ListViewItem[] = [
+  {
+    id: 'charlottes-web',
+    icon: '📕',
+    title: "Charlotte's Web",
+    subtitle: 'E.B. White',
+    stats: [
+      { label: 'complete', value: '64%', progress: 64 },
+      { label: 'avg speed', value: '182 wpm' },
+    ],
+    info: 'Assigned for Unit 3. Due Friday, Sep 12.',
+  },
+  {
+    id: 'the-giver',
+    icon: '📗',
+    title: 'The Giver',
+    subtitle: 'Lois Lowry',
+    stats: [
+      { label: 'complete', value: '12%', progress: 12 },
+      { label: 'avg speed', value: '164 wpm' },
+    ],
+    info: 'Independent reading pick.',
+  },
+  {
+    id: 'hatchet',
+    icon: '📘',
+    title: 'Hatchet',
+    subtitle: 'Gary Paulsen',
+    stats: [
+      { label: 'complete', value: '89%', progress: 89 },
+      { label: 'avg speed', value: '175 wpm' },
+    ],
+    info: 'Assigned for Unit 2. Book report due Monday, Sep 22.',
+  },
+  {
+    id: 'wrinkle-in-time',
+    icon: '📙',
+    title: 'A Wrinkle in Time',
+    subtitle: "Madeleine L'Engle",
+    stats: [
+      { label: 'complete', value: '37%', progress: 37 },
+      { label: 'avg speed', value: '158 wpm' },
+    ],
+    info: 'Book club selection. Discussion every Thursday.',
+  },
+  {
+    id: 'holes',
+    icon: '📔',
+    title: 'Holes',
+    subtitle: 'Louis Sachar',
+    stats: [
+      { label: 'complete', value: '100%', progress: 100 },
+      { label: 'avg speed', value: '190 wpm' },
+    ],
+    info: 'Finished! Quiz available in the Reading Experience.',
+  },
+  {
+    id: 'because-of-winn-dixie',
+    icon: '📓',
+    title: 'Because of Winn-Dixie',
+    subtitle: 'Kate DiCamillo',
+    stats: [
+      { label: 'complete', value: '5%', progress: 5 },
+      { label: 'avg speed', value: '170 wpm' },
+    ],
+    info: 'Just started. Assigned for Unit 4, due Friday, Oct 10.',
+  },
+]
 
 export function StudentBooksPage() {
+  const navigate = useNavigate()
+
   return (
     <div
       style={{
@@ -29,40 +102,11 @@ export function StudentBooksPage() {
         Browse and manage your reading list
       </p>
 
-      <div
-        style={{
-          display: 'grid',
-          gridTemplateColumns: 'repeat(auto-fill, minmax(200px, 1fr))',
-          gap: spacing.lg,
-        }}
-      >
-        {/* Placeholder cards */}
-        {[1, 2, 3, 4, 5, 6].map((i) => (
-          <div
-            key={i}
-            style={{
-              padding: spacing.lg,
-              backgroundColor: colors.surface,
-              borderRadius: '8px',
-              border: `1px solid ${colors.neutral300}`,
-              textAlign: 'center',
-            }}
-          >
-            <div
-              style={{
-                width: '100%',
-                aspectRatio: '3/4',
-                backgroundColor: colors.primaryLight,
-                borderRadius: '4px',
-                marginBottom: spacing.md,
-              }}
-            />
-            <p style={{ fontSize: typography.sizes.sm, fontWeight: typography.weights.medium }}>
-              Book {i}
-            </p>
-          </div>
-        ))}
-      </div>
+      <ListView
+        aria-label="My books"
+        items={books}
+        onItemClick={() => navigate('/student/reading')}
+      />
     </div>
   )
 }
