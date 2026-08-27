@@ -1,5 +1,6 @@
 import { BrowserRouter, Routes, Route, Navigate, Outlet } from 'react-router-dom'
 import { LeftSidebar } from './components/LeftSidebar'
+import { GrainOverlay } from './components/layout/GrainOverlay'
 import { StudentBooksPage } from './pages/StudentBooksPage'
 import { StudentReadingPage } from './pages/StudentReadingPage'
 import { TeacherBooksPage } from './pages/TeacherBooksPage'
@@ -10,6 +11,7 @@ import { colors } from './edu-ui/tokens'
 function AppLayout() {
   return (
     <div style={{ display: 'flex', height: '100vh', backgroundColor: colors.background }}>
+      <GrainOverlay />
       <LeftSidebar />
       <main
         style={{

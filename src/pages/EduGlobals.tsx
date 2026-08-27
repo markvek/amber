@@ -2,6 +2,7 @@ import { useState, type ReactNode } from 'react'
 import { Button } from '../components/ui/Button'
 import { Label, Input, Card, CardHeader, CardTitle, CardContent, Badge, Textarea, Separator, Sheet, SheetTrigger, SheetContent, SheetHeader, SheetTitle, Popover, PopoverTrigger, PopoverContent, Collapsible, CollapsibleTrigger, CollapsibleContent } from '../components/ui'
 import { colors, typography, spacing, radii, shadows } from '../edu-ui/tokens'
+import { GrainOverlay } from '../components/layout/GrainOverlay'
 
 type FontFamily = 'inter' | 'georgia' | 'opendyslexic'
 
@@ -200,6 +201,36 @@ export function EduGlobals() {
             <span key={name} style={{ fontWeight: weight, fontSize: typography.sizes.lg }}>
               {name} {weight}
             </span>
+          ))}
+        </div>
+      </Section>
+
+      <Section title="Grain Overlay">
+        <p style={{ fontSize: typography.sizes.sm, color: colors.textSecondary, marginBottom: spacing.md }}>
+          Paper-grain texture component (src/components/layout/GrainOverlay). Rendered app-wide over the
+          canvas and cards; intensity is adjustable.
+        </p>
+        <div style={{ display: 'flex', flexWrap: 'wrap', gap: spacing.lg }}>
+          {[0.15, 0.25, 0.5].map((intensity) => (
+            <div key={intensity} style={{ textAlign: 'center' }}>
+              <div
+                style={{
+                  position: 'relative',
+                  width: '160px',
+                  height: '100px',
+                  backgroundColor: colors.background,
+                  borderRadius: radii.md,
+                  border: `1px solid ${colors.neutral300}`,
+                  overflow: 'hidden',
+                  marginBottom: spacing.xs,
+                }}
+              >
+                <GrainOverlay position="absolute" intensity={intensity} />
+              </div>
+              <span style={{ fontSize: typography.sizes.xs, color: colors.textSecondary }}>
+                intensity {intensity}
+              </span>
+            </div>
           ))}
         </div>
       </Section>
