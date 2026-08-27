@@ -251,7 +251,7 @@ export function EduGlobals() {
               marginBottom: spacing.md,
             }}
           >
-            Primary (Indigo #4F46E5)
+            Primary (Blue #1360C4)
           </h3>
           <p style={{ fontSize: typography.sizes.sm, color: colors.textSecondary, marginBottom: spacing.md }}>
             Main CTAs, hero buttons, primary actions. Use for "Start lesson," "Submit answer," "Continue."

@@ -69,9 +69,9 @@ function SheetContent({
           className
         )}
         style={{
-          backgroundColor: '#ffffff',
-          color: '#111827',
-          borderColor: '#d1d5db',
+          backgroundColor: colors.surface,
+          color: colors.textPrimary,
+          borderColor: colors.neutral300,
           ...style,
         }}
         {...props}

@@ -1,39 +1,39 @@
 export const colors = {
-  // Brand — core color system
-  primary: '#662117', // Color 1: primary actions, main CTAs, buttons
-  primaryHover: '#5a1a11', // darker shade: hover/active state
-  primaryLight: '#e8d5cf', // light shade: backgrounds, light fills
+  // Brand — core color system (neutral, Facebook-style: grays plus one blue)
+  primary: '#1360C4', // deepened Facebook blue: primary actions, main CTAs (white text 6.0:1 AA)
+  primaryHover: '#0E4E9E', // darker navy: hover/active state, reads by lightness not hue
+  primaryLight: '#EBF2FC', // pale blue tint: active nav, selected rows (primary text 5.3:1)
 
-  secondary: '#AE4625', // Color 2: secondary actions, section highlights
-  secondaryLight: '#e5cfc4', // light secondary: soft backgrounds
+  secondary: '#4B4F56', // charcoal-slate: secondary actions, labels (white text 7:1)
+  secondaryLight: '#E4E6EB', // gray fill: secondary buttons, use with neutral900 text
 
-  accent: '#D58E3A', // Color 3: emphasis, callouts, tips, accents
-  accentLight: '#f0dcc8', // light accent: backgrounds, accent fills
+  accent: '#0E4E9E', // restrained navy: emphasis, callouts (differentiated by darkness)
+  accentLight: '#DCE7F5', // cool tint: accent chips, badges
 
-  dark: '#303724', // Color 4: dark neutral, strong text, dark components
+  dark: '#242526', // dark-surface charcoal: footers, headers (white text 15.4:1)
 
-  // Semantic — meaningful colors
-  success: '#16a34a', // Green: completion, validation, positive feedback
-  warning: '#d97706', // Amber: caution, incomplete, needs attention
-  error: '#C62F1D', // Red: error states, destructive actions, stop
-  info: '#0284c7', // Blue: information, tips, neutral alerts
-  select: '#1D6363', // Teal: selected states, selection highlights, active states
+  // Semantic — ordered by lightness so states never rely on hue alone
+  success: '#1E7A44', // dark green: completion, positive feedback (white 5.4:1)
+  warning: '#8A5300', // desaturated dark ochre: caution, incomplete (white 6.3:1)
+  error: '#B42318', // blue-leaning dark red: errors, destructive (white 6.6:1)
+  info: '#1259B3', // deep blue distinct from primary by darkness (white 6.8:1)
+  select: '#5B4BC4', // dark indigo: selection highlights (white 6.5:1)
 
-  // Neutrals — grayscale for structure
-  neutral900: '#111827', // near-black: dark text, strong contrast
-  neutral700: '#374151', // dark gray: secondary text, borders
-  neutral500: '#6b7280', // mid gray: disabled text, hints
-  neutral300: '#d1d5db', // light gray: dividers, subtle borders
-  neutral100: '#f3f4f6', // lighter gray: hover states, subtle backgrounds
-  neutral50: '#f9fafb', // near-white: minimal backgrounds
+  // Neutrals — Facebook grayscale for structure
+  neutral900: '#1C1E21', // near-black: dark text, strong contrast (16.7:1 on white)
+  neutral700: '#3E4042', // dark gray: headings on tinted surfaces, hover text
+  neutral500: '#65676B', // mid gray: icons, secondary UI (5.7:1 on white)
+  neutral300: '#CED0D4', // divider/border gray: non-text use only
+  neutral100: '#E4E6EB', // hover fills, input backgrounds, skeletons
+  neutral50: '#F7F8FA', // faintest cool gray: zebra rows, wells
 
   // Surface & text
   surface: '#ffffff', // pure white: cards, modals, primary surfaces
-  surfaceMuted: '#f9fafb', // almost-white: alternate surface (lists, sections)
-  background: '#FCF2DD', // cream: page background (use with grainy texture)
-  textPrimary: '#111827', // dark: main body text
-  textSecondary: '#6b7280', // gray: secondary text, labels, meta
-  textInverse: '#ffffff', // white: text on dark backgrounds
+  surfaceMuted: '#F7F8FA', // quiet cool gray: inset panels within cards
+  background: '#F0F2F5', // Facebook page-canvas gray: makes white cards float
+  textPrimary: '#1C1E21', // near-black: main body text (14.9:1 on background)
+  textSecondary: '#606266', // meta-text gray: labels, meta (5.5:1 on background)
+  textInverse: '#ffffff', // white: text on dark/brand/semantic fills
 } as const
 
 export const typography = {
