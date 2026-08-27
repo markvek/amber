@@ -1,0 +1,50 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>InstaLILY NYC</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com" />
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet" />
+    <style>
+      @font-face {
+        font-family: 'OpenDyslexic';
+        src: url('/src/fonts/OpenDyslexic-Regular.otf') format('opentype');
+        font-weight: normal;
+        font-style: normal;
+      }
+      @font-face {
+        font-family: 'OpenDyslexic';
+        src: url('/src/fonts/OpenDyslexic-Bold.otf') format('opentype');
+        font-weight: bold;
+        font-style: normal;
+      }
+      @font-face {
+        font-family: 'OpenDyslexic';
+        src: url('/src/fonts/OpenDyslexic-Italic.otf') format('opentype');
+        font-weight: normal;
+        font-style: italic;
+      }
+      @font-face {
+        font-family: 'OpenDyslexic';
+        src: url('/src/fonts/OpenDyslexic-BoldItalic.otf') format('opentype');
+        font-weight: bold;
+        font-style: italic;
+      }
+    </style>
+  </head>
+  <body>
+    <svg style="display: none;">
+      <defs>
+        <filter id="grain">
+          <feTurbulence type="fractalNoise" baseFrequency="0.9" numOctaves="4" result="noise" />
+          <feColorMatrix in="noise" type="saturate" values="0" />
+          <feBlend in="SourceGraphic" in2="noise" mode="overlay" />
+        </filter>
+      </defs>
+    </svg>
+    <div id="root"></div>
+    <script type="module" src="/src/main.tsx"></script>
+  </body>
+</html>

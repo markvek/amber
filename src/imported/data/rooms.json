@@ -1,0 +1,78 @@
+{
+  "rooms": [
+    {
+      "id": "001",
+      "name": "Bean Sprout",
+      "office": "NYC",
+      "floor": 5,
+      "capacity": 4,
+      "icon": "Leaf",
+      "type": "physical"
+    },
+    {
+      "id": "002",
+      "name": "Charlie",
+      "office": "NYC",
+      "floor": 5,
+      "capacity": 4,
+      "icon": "Fish",
+      "type": "physical"
+    },
+    {
+      "id": "003",
+      "name": "Bao",
+      "office": "NYC",
+      "floor": 5,
+      "capacity": 8,
+      "icon": "Dog",
+      "type": "physical",
+      "image": "/rooms/bao.jpg",
+      "floorplan": "/rooms/bao-floorplan.png"
+    },
+    {
+      "id": "004",
+      "name": "Hello Kitty",
+      "office": "NYC",
+      "floor": 5,
+      "capacity": 2,
+      "icon": "Cat",
+      "type": "physical"
+    },
+    {
+      "id": "008",
+      "name": "Lounge",
+      "office": "NYC",
+      "floor": 5,
+      "capacity": 6,
+      "icon": "Coffee",
+      "type": "physical"
+    },
+    {
+      "id": "100",
+      "name": "Virtual",
+      "office": null,
+      "floor": null,
+      "capacity": null,
+      "icon": "Monitor",
+      "type": "virtual"
+    },
+    {
+      "id": "101",
+      "name": "Zoom",
+      "office": null,
+      "floor": null,
+      "capacity": null,
+      "icon": "Video",
+      "type": "virtual"
+    },
+    {
+      "id": "102",
+      "name": "Home Office",
+      "office": null,
+      "floor": null,
+      "capacity": null,
+      "icon": "Home",
+      "type": "virtual"
+    }
+  ]
+}
