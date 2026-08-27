@@ -1,5 +1,5 @@
 import { BrowserRouter, Routes, Route, Navigate, Outlet } from 'react-router-dom'
-import { LeftSidebar } from './components/LeftSidebar'
+import { DevNav } from './components/DevNav'
 import { GrainOverlay } from './components/layout/GrainOverlay'
 import { StudentBooksPage } from './pages/StudentBooksPage'
 import { StudentReadingPage } from './pages/StudentReadingPage'
@@ -13,7 +13,7 @@ function AppLayout() {
     <div style={{ display: 'flex', height: '100vh', backgroundColor: colors.background }}>
       {/* zIndex 0 keeps the grain on the page canvas only — cards and surfaces above stay fully white */}
       <GrainOverlay intensity={0.5} style={{ zIndex: 0 }} />
-      <LeftSidebar />
+      <DevNav />
       <main
         style={{
           flex: 1,
