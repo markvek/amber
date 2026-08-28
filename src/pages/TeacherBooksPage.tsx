@@ -4,37 +4,37 @@ import { ListView, type ListViewItem } from '../components/data/ListView'
 
 const libraryBooks: ListViewItem[] = [
   {
-    id: 'charlottes-web',
+    id: 'to-kill-a-mockingbird',
     icon: '📕',
-    title: "Charlotte's Web",
-    subtitle: 'E.B. White',
+    title: 'To Kill a Mockingbird',
+    subtitle: 'Harper Lee',
     stats: [
-      { label: 'class avg', value: '58%', progress: 58 },
-      { label: 'reading', value: '24 students' },
-    ],
-    info: 'Unit 3 core text. Whole-class assignment, due Friday, Sep 12.',
-  },
-  {
-    id: 'the-giver',
-    icon: '📗',
-    title: 'The Giver',
-    subtitle: 'Lois Lowry',
-    stats: [
-      { label: 'class avg', value: '31%', progress: 31 },
-      { label: 'reading', value: '9 students' },
-    ],
-    info: 'Independent reading option for advanced readers.',
-  },
-  {
-    id: 'hatchet',
-    icon: '📘',
-    title: 'Hatchet',
-    subtitle: 'Gary Paulsen',
-    stats: [
-      { label: 'class avg', value: '82%', progress: 82 },
+      { label: 'class avg', value: '42%', progress: 42 },
       { label: 'reading', value: '18 students' },
     ],
-    info: 'Unit 2 text. Book reports due Monday, Sep 22.',
+    info: 'Unit 5 core text. Class discussion sessions scheduled for next week.',
+  },
+  {
+    id: 'the-outsiders',
+    icon: '📗',
+    title: 'The Outsiders',
+    subtitle: 'S.E. Hinton',
+    stats: [
+      { label: 'class avg', value: '68%', progress: 68 },
+      { label: 'reading', value: '21 students' },
+    ],
+    info: 'Most students approaching completion. Essays graded and returned.',
+  },
+  {
+    id: 'the-odyssey',
+    icon: '📘',
+    title: 'The Odyssey',
+    subtitle: 'Homer',
+    stats: [
+      { label: 'class avg', value: '35%', progress: 35 },
+      { label: 'reading', value: '15 students' },
+    ],
+    info: 'Classical literature track. Study guide and annotations shared.',
   },
   {
     id: 'wrinkle-in-time',
@@ -48,26 +48,26 @@ const libraryBooks: ListViewItem[] = [
     info: 'Book club selection. Discussion groups meet Thursdays.',
   },
   {
-    id: 'holes',
+    id: 'lord-of-the-flies',
     icon: '📔',
-    title: 'Holes',
-    subtitle: 'Louis Sachar',
+    title: 'Lord of the Flies',
+    subtitle: 'William Golding',
     stats: [
-      { label: 'class avg', value: '95%', progress: 95 },
-      { label: 'reading', value: '21 students' },
+      { label: 'class avg', value: '86%', progress: 86 },
+      { label: 'reading', value: '20 students' },
     ],
-    info: 'Nearly all students finished. Quiz results in Analytics.',
+    info: 'High engagement across the class. Analysis essays due Wednesday.',
   },
   {
-    id: 'because-of-winn-dixie',
+    id: 'the-hunger-games',
     icon: '📓',
-    title: 'Because of Winn-Dixie',
-    subtitle: 'Kate DiCamillo',
+    title: 'The Hunger Games',
+    subtitle: 'Suzanne Collins',
     stats: [
-      { label: 'class avg', value: '8%', progress: 8 },
+      { label: 'class avg', value: '15%', progress: 15 },
       { label: 'reading', value: '24 students' },
     ],
-    info: 'Unit 4 text, just assigned. Due Friday, Oct 10.',
+    info: 'Newly assigned contemporary fiction unit. Full class participation.',
   },
 ]
 
