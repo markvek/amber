@@ -1,78 +1,26 @@
 import { useNavigate } from 'react-router-dom'
 import { colors, typography, spacing } from '../edu-ui/tokens'
 import { ListView, type ListViewItem } from '../components/data/ListView'
-
-const books: ListViewItem[] = [
-  {
-    id: 'to-kill-a-mockingbird',
-    icon: '📕',
-    title: 'To Kill a Mockingbird',
-    subtitle: 'Harper Lee',
-    stats: [
-      { label: 'complete', value: '45%', progress: 45 },
-      { label: 'avg speed', value: '168 wpm' },
-    ],
-    info: 'Unit 5 core text. Discussion sections begin next Monday.',
-  },
-  {
-    id: 'the-outsiders',
-    icon: '📗',
-    title: 'The Outsiders',
-    subtitle: 'S.E. Hinton',
-    stats: [
-      { label: 'complete', value: '78%', progress: 78 },
-      { label: 'avg speed', value: '185 wpm' },
-    ],
-    info: 'Nearly finished! Analysis essay due Friday, Oct 5.',
-  },
-  {
-    id: 'the-odyssey',
-    icon: '📘',
-    title: 'The Odyssey',
-    subtitle: 'Homer',
-    stats: [
-      { label: 'complete', value: '22%', progress: 22 },
-      { label: 'avg speed', value: '145 wpm' },
-    ],
-    info: 'Classical literature elective. Comprehensive study guide available.',
-  },
-  {
-    id: 'wrinkle-in-time',
-    icon: '📙',
-    title: 'A Wrinkle in Time',
-    subtitle: "Madeleine L'Engle",
-    stats: [
-      { label: 'complete', value: '37%', progress: 37 },
-      { label: 'avg speed', value: '158 wpm' },
-    ],
-    info: 'Book club selection. Discussion every Thursday.',
-  },
-  {
-    id: 'lord-of-the-flies',
-    icon: '📔',
-    title: 'Lord of the Flies',
-    subtitle: 'William Golding',
-    stats: [
-      { label: 'complete', value: '91%', progress: 91 },
-      { label: 'avg speed', value: '175 wpm' },
-    ],
-    info: 'Nearly complete. Thematic analysis due Wednesday.',
-  },
-  {
-    id: 'the-hunger-games',
-    icon: '📓',
-    title: 'The Hunger Games',
-    subtitle: 'Suzanne Collins',
-    stats: [
-      { label: 'complete', value: '8%', progress: 8 },
-      { label: 'avg speed', value: '172 wpm' },
-    ],
-    info: 'Just started. Contemporary dystopian fiction unit.',
-  },
-]
+import { BookIcon } from '../components/data/BookIcon'
+import { StatusPanel } from '../components/data/StatusPanel'
+import { useBooks } from '../lib/useBooks'
+import { bookInfo, formatCount } from '../lib/formatBook'
 
 export function StudentBooksPage() {
   const navigate = useNavigate()
+  const { books, loading, error } = useBooks()
+
+  const items: ListViewItem[] = books.map((book) => ({
+    id: String(book.id),
+    icon: <BookIcon seed={book.id} />,
+    title: book.title,
+    subtitle: book.author || 'Unknown author',
+    stats: [
+      { label: 'pages', value: formatCount(book.total_pages) },
+      { label: 'words', value: formatCount(book.total_words) },
+    ],
+    info: bookInfo(book),
+  }))
 
   return (
     <div
@@ -102,11 +50,19 @@ export function StudentBooksPage() {
         Browse and manage your reading list
       </p>
 
-      <ListView
-        aria-label="My books"
-        items={books}
-        onItemClick={() => navigate('/student/reading')}
-      />
+      {loading ? (
+        <StatusPanel message="Loading books…" />
+      ) : error ? (
+        <StatusPanel tone="error" message={`Couldn't load books: ${error}`} />
+      ) : items.length === 0 ? (
+        <StatusPanel message="No books on your reading list yet." />
+      ) : (
+        <ListView
+          aria-label="My books"
+          items={items}
+          onItemClick={() => navigate('/student/reading')}
+        />
+      )}
     </div>
   )
 }

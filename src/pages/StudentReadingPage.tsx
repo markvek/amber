@@ -1,4 +1,13 @@
-import { useEffect, useLayoutEffect, useMemo, useRef, useState, type CSSProperties, type PointerEvent as ReactPointerEvent } from 'react'
+import {
+  useEffect,
+  useLayoutEffect,
+  useMemo,
+  useRef,
+  useState,
+  type CSSProperties,
+  type MouseEvent as ReactMouseEvent,
+  type PointerEvent as ReactPointerEvent,
+} from 'react'
 import { useNavigate } from 'react-router-dom'
 import { Popover, PopoverTrigger, PopoverContent, Label, Separator } from '../components/ui'
 import { colors, typography, spacing, radii, shadows } from '../edu-ui/tokens'
@@ -34,6 +43,25 @@ const TOP_GAP_PX = 48
 const DIM_OPACITY = 0.25
 const WORD_TRANSITION_MS = 180
 
+/** Double-click definition card, after the Paper "Definition popover" spec */
+const DEFINITION_CARD_WIDTH = 320
+/** Placeholder copy shown for every word until real dictionary lookups are wired up */
+const DEFINITION_PLACEHOLDER = {
+  partOfSpeech: 'noun',
+  text: 'A group of people and pack animals travelling together across a desert or other hard country.',
+}
+
+/** The marked word, per the design: a pale blue chip with a dashed underline. Negative
+ *  margins cancel the chip padding so surrounding words don't shift when it appears. */
+const vocabChipStyle: CSSProperties = {
+  backgroundColor: '#EBF2FC',
+  borderRadius: '4px',
+  borderBottom: '2px dashed #1360C4',
+  color: '#0E4E9E',
+  padding: '1px 5px',
+  margin: '-1px -5px',
+}
+
 /** Height of the scrub dial track, in px — knob and fill are positioned against it */
 const RAIL_HEIGHT = 460
 const KNOB_HEIGHT = 32
@@ -43,13 +71,13 @@ const CHAPTER_MARK_FRACTIONS = [0.35, 0.55, 0.75]
 const ASSUMED_WPM = 148
 
 const PARAGRAPHS: string[] = [
-  'Lorem ipsum dolor sit amet, consectetur adipiscing elit. Sed do eiusmod tempor incididunt ut labore et dolore magna aliqua. Ut enim ad minim veniam, quis nostrud exercitation ullamco laboris nisi ut aliquip ex ea commodo consequat. Duis aute irure dolor in reprehenderit in voluptate velit esse cillum dolore eu fugiat nulla pariatur.',
-  'Excepteur sint occaecat cupidatat non proident, sunt in culpa qui officia deserunt mollit anim id est laborum. Sed ut perspiciatis unde omnis iste natus error sit voluptatem accusantium doloremque laudantium, totam rem aperiam, eaque ipsa quae ab illo inventore veritatis et quasi architecto beatae vitae dicta sunt explicabo.',
-  'Nemo enim ipsam voluptatem quia voluptas sit aspernatur aut odit aut fugit, sed quia consequuntur magni dolores eos qui ratione voluptatem sequi nesciunt. Neque porro quisquam est, qui dolorem ipsum quia dolor sit amet, consectetur, adipisci velit, sed quia non numquam eius modi tempora incidunt ut labore et dolore magnam aliquam quaerat voluptatem.',
-  'Ut enim ad minima veniam, quis nostrum exercitationem ullam corporis suscipit laboriosam, nisi ut aliquid ex ea commodi consequatur? Quis autem vel eum iure reprehenderit qui in ea voluptate velit esse quam nihil molestiae consequatur, vel illum qui dolorem eum fugiat quo voluptas nulla pariatur?',
-  'At vero eos et accusamus et iusto odio dignissimos ducimus qui blanditiis praesentium voluptatum deleniti atque corrupti quos dolores et quas molestias excepturi sint occaecati cupiditate non provident, similique sunt in culpa qui officia deserunt mollitia animi, id est laborum et dolorum fuga. Et harum quidem rerum facilis est et expedita distinctio.',
-  'Nam libero tempore, cum soluta nobis est eligendi optio cumque nihil impedit quo minus id quod maxime placeat facere possimus, omnis voluptas assumenda est, omnis dolor repellendus. Temporibus autem quibusdam et aut officiis debitis aut rerum necessitatibus saepe eveniet ut et voluptates repudiandae sint et molestiae non recusandae.',
-  'Itaque earum rerum hic tenetur a sapiente delectus, ut aut reiciendis voluptatibus maiores alias consequatur aut perferendis doloribus asperiores repellat. Lorem ipsum dolor sit amet, consectetur adipiscing elit, sed do eiusmod tempor incididunt ut labore et dolore magna aliqua.',
+  '"TOY STORY" — FADE IN: INT. ANDY\'S BEDROOM. A row of moving boxes lie on the floor of the room. They are drawn up in crayon to look like a miniature Western town. The bedroom is lined with cloud wallpaper giving the impression of sky. One of the boxes has a children\'s illustrated "WANTED" poster of a Mr. Potato Head taped to it. A MR. POTATO HEAD DOLL is set in front of the poster. The VOICE OVER of ANDY, a 6-year-old boy, can be heard acting out all the voices of the scene.',
+  'ANDY (AS POTATO HEAD): Alright everyone, this is a stick-up! Don\'t anybody move! Now empty that safe! A GROUP OF TOYS have been crowded together in front of the "BANK" box. Andy\'s hand lowers a CERAMIC PIGGY BANK in front of Mr. Potato Head and shakes out a pile of coins to the floor. Mr. Potato Head kisses the coins. ANDY (AS POTATO HEAD): Ooh! Money. Money. Money. (kissing noises)',
+  'A porcelain figurine of the shepherdess, BO PEEP, is brought into the scene. ANDY (AS BO PEEP): Stop it! Stop it, you mean old potato! ANDY (AS POTATO HEAD): Quiet Bo Peep, or your sheep get run over! The companion porcelain sheep are placed in the center of a Hot Wheels track loop. ANDY (AS SHEEP): Heeeeelp! BAAAAA! Heeeelp us! ANDY (AS BO PEEP): Oh, no! Not my sheep! Somebody do something!',
+  'WOODY, a pull-string doll cowboy, enters into the scene opposite the inanimate spud. Andy\'s hand pulls on the ring in the center of Woody\'s back. WOODY (VOICE BOX): Reach for the sky. ANDY (AS POTATO HEAD): Oh, no! Sheriff Woody!! ANDY (AS WOODY): I\'m here to stop you, One-Eyed Bart. Andy\'s hand pulls out one of Mr. Potato Head\'s eyes. ANDY (AS POTATO HEAD): Doooooh! How\'d you know it was me! ANDY (AS WOODY): Are you gonna come quietly?',
+  'ANDY (AS POTATO HEAD): You can\'t touch me Sheriff! I brought my attack dog with a built-in force field! Andy places a TOY DOG, with a SLINKY for a mid-section, in front of Mr. Potato Head and stretches him out. ANDY (AS WOODY): Well I brought my DINOSAUR, who eats force field dogs!! Andy reveals a PLASTIC TYRANNOSAURUS REX, who stomps on the Slinky Dog. ANDY (AS DINOSAUR): AAAAR! ROAR-ROAR-ROAR! ANDY (AS SLINKY DOG): YIPE! YIPE-YIPE-YIPE!',
+  'ANDY (AS WOODY): You\'re goin\' to jail, Bart. Andy picks up Mr. Potato Head and places him in a baby crib in the room. A cardboard sign is taped to the bars with the word "JAIL" written in crayon. ANDY (AS WOODY): Say good-bye to the wife and tatertots.',
+  'Andy\'s 1-year-old sister, MOLLY, crawls over and picks up Mr. Potato Head. She sucks on him for a beat then proceeds to pound the toy repeatedly against the rail of her crib, forcing some of his parts loose. Andy, wearing a cowboy hat himself, picks up Woody off the floor.',
 ]
 
 const PARAGRAPH_WORDS: string[][] = PARAGRAPHS.map((paragraph) => paragraph.split(/\s+/).filter(Boolean))
@@ -60,6 +88,104 @@ function CloseIcon() {
     <svg width="15" height="15" viewBox="0 0 24 24" fill="none" aria-hidden>
       <path d="M18 6L6 18M6 6l12 12" stroke="currentColor" strokeWidth="2.4" strokeLinecap="round" />
     </svg>
+  )
+}
+
+function SpeakerIcon() {
+  return (
+    <svg width="12" height="12" viewBox="0 0 24 24" fill="none" aria-hidden>
+      <path
+        d="M11 5L6 9H3v6h3l5 4V5z"
+        stroke="#FFFFFF"
+        strokeWidth="2.2"
+        strokeLinecap="round"
+        strokeLinejoin="round"
+      />
+      <path d="M16 9a4 4 0 010 6" stroke="#FFFFFF" strokeWidth="2.2" strokeLinecap="round" strokeLinejoin="round" />
+    </svg>
+  )
+}
+
+/** Placeholder definition card hung under a double-clicked word. Fixed-positioned so the
+ *  reading frame can't clip it — any scroll dismisses it instead of dragging it along. */
+function DefinitionPopover({ word, x, y }: { word: string; x: number; y: number }) {
+  const edgeMargin = 12
+  // Aim the card so its caret sits under the word, but never off the viewport
+  const left = Math.min(Math.max(x - 30, edgeMargin), window.innerWidth - DEFINITION_CARD_WIDTH - edgeMargin)
+  const caretLeft = Math.min(Math.max(x - left - 8, 12), DEFINITION_CARD_WIDTH - 28)
+
+  const sayIt = () => {
+    try {
+      speechSynthesis.cancel()
+      speechSynthesis.speak(new SpeechSynthesisUtterance(word))
+    } catch {
+      // No speech synthesis on this browser — the pill is just decorative then
+    }
+  }
+
+  return (
+    <div
+      data-definition-popover
+      role="dialog"
+      aria-label={`Definition of ${word}`}
+      style={{
+        position: 'fixed',
+        left: `${left}px`,
+        top: `${y + 9}px`,
+        width: `${DEFINITION_CARD_WIDTH}px`,
+        display: 'flex',
+        flexDirection: 'column',
+        gap: '8px',
+        padding: '14px 16px',
+        backgroundColor: '#242526',
+        borderRadius: '8px',
+        boxShadow: '0 10px 15px -3px #00000038, 0 4px 6px -4px #0000002E',
+        fontFamily: "'Inter', system-ui, sans-serif",
+        zIndex: 30,
+      }}
+    >
+      <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between' }}>
+        <div style={{ display: 'flex', alignItems: 'baseline', gap: '8px' }}>
+          <span style={{ color: '#FFFFFF', fontSize: '14px', fontWeight: 600, lineHeight: '18px' }}>
+            {word.toLowerCase()}
+          </span>
+          <span style={{ color: '#CED0D4', fontSize: '12px', fontStyle: 'italic', lineHeight: '16px' }}>
+            {DEFINITION_PLACEHOLDER.partOfSpeech}
+          </span>
+        </div>
+        <button
+          onClick={sayIt}
+          style={{
+            display: 'flex',
+            alignItems: 'center',
+            gap: '6px',
+            height: '24px',
+            padding: '0 9px',
+            flexShrink: 0,
+            backgroundColor: '#3E4042',
+            border: 'none',
+            borderRadius: '999px',
+            color: '#FFFFFF',
+            fontSize: '11px',
+            fontWeight: 600,
+            cursor: 'pointer',
+          }}
+        >
+          <SpeakerIcon />
+          Say it
+        </button>
+      </div>
+      <p style={{ color: '#E4E6EB', fontSize: '13px', lineHeight: '19px' }}>{DEFINITION_PLACEHOLDER.text}</p>
+      <svg
+        width="16"
+        height="8"
+        viewBox="0 0 16 8"
+        aria-hidden
+        style={{ position: 'absolute', top: '-7px', left: `${caretLeft}px` }}
+      >
+        <path d="M8 0 L16 8 L0 8 Z" fill="#242526" />
+      </svg>
+    </div>
   )
 }
 
@@ -84,6 +210,8 @@ export function StudentReadingPage() {
   const [font, setFont] = useState<FontFamily>('georgia')
   const [pageWidth, setPageWidth] = useState(760)
   const [progress, setProgress] = useState(0)
+  // Word the reader double-clicked: its flat index plus where to hang the definition card
+  const [definedWord, setDefinedWord] = useState<{ idx: number; word: string; x: number; y: number } | null>(null)
   // How far the frontier travels before locking mid-frame; doubles as the sticky travel room
   const [rampPx, setRampPx] = useState(0)
 
@@ -92,6 +220,8 @@ export function StudentReadingPage() {
   const railRef = useRef<HTMLDivElement>(null)
   const wordRefs = useRef<(HTMLSpanElement | null)[]>([])
   const frameRef = useRef<number | undefined>(undefined)
+  const definedIdxRef = useRef<number | null>(null)
+  definedIdxRef.current = definedWord?.idx ?? null
 
   // Stable flat index per word so refs line up across renders
   const wordOffsets = useMemo(() => {
@@ -132,7 +262,8 @@ export function StudentReadingPage() {
     const textLeft = textRect?.left ?? rect.left
     const textWidth = textRect?.width || 1
 
-    // Group words into lines by their rounded vertical centre
+    // Group words into lines by their rounded vertical centre, and record each word's
+    // horizontal centre from the same measurement pass
     const lineOf: number[] = []
     const lineYs: number[] = []
     const wordCenterX: number[] = []
@@ -157,8 +288,12 @@ export function StudentReadingPage() {
     wordRefs.current.forEach((span, i) => {
       if (!span) return
       const t = lineT[lineOf[i]]
-      // One shared denominator so the sweep pace is uniform; short last lines finish early
-      const lit = t >= 1 || (t > 0 && (wordCenterX[i] - textLeft) / textWidth <= t)
+      // One shared denominator so the sweep pace is uniform; short last lines finish
+      // early. A word with its definition open stays at full ink even when unread.
+      const lit =
+        i === definedIdxRef.current ||
+        t >= 1 ||
+        (t > 0 && (wordCenterX[i] - textLeft) / textWidth <= t)
       span.style.opacity = lit ? '1' : String(DIM_OPACITY)
     })
 
@@ -199,6 +334,40 @@ export function StudentReadingPage() {
   const scrollByLines = (lines: number) => {
     scrollerRef.current?.scrollBy({ top: lines * lineHeightPx, behavior: 'smooth' })
   }
+
+  // Double-clicking a word raises the definition card under it
+  const onWordDoubleClick = (e: ReactMouseEvent<HTMLDivElement>) => {
+    const span = (e.target as HTMLElement).closest('span')
+    if (!span) return
+    const idx = wordRefs.current.indexOf(span)
+    if (idx === -1) return
+    const word = (span.textContent ?? '').trim().replace(/^[^\p{L}\p{N}]+|[^\p{L}\p{N}]+$/gu, '')
+    if (!word) return
+    // The chip is the highlight here, so drop the browser's own double-click selection
+    window.getSelection()?.removeAllRanges()
+    const rect = span.getBoundingClientRect()
+    setDefinedWord({ idx, word, x: rect.left + rect.width / 2, y: rect.bottom })
+  }
+
+  // The chip re-renders its word span, so repaint opacities around it; while the card is
+  // open, Escape or any press outside it dismisses
+  useEffect(() => {
+    schedulePaint()
+    if (!definedWord) return
+    const onPointerDown = (e: PointerEvent) => {
+      const target = e.target as HTMLElement | null
+      if (!target?.closest('[data-definition-popover]')) setDefinedWord(null)
+    }
+    const onKeyDown = (e: KeyboardEvent) => {
+      if (e.key === 'Escape') setDefinedWord(null)
+    }
+    document.addEventListener('pointerdown', onPointerDown)
+    window.addEventListener('keydown', onKeyDown)
+    return () => {
+      document.removeEventListener('pointerdown', onPointerDown)
+      window.removeEventListener('keydown', onKeyDown)
+    }
+  }, [definedWord])
 
   // The footer advertises the space bar, so it has to actually drift the page
   useEffect(() => {
@@ -312,9 +481,8 @@ export function StudentReadingPage() {
 
         <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', gap: '2px' }}>
           <div style={{ fontSize: '13px', fontWeight: typography.weights.semibold, color: colors.neutral700 }}>
-            The Salt Road
+            Toy Story Full Script
           </div>
-          <div style={railLabelStyle}>CHAPTER 4</div>
         </div>
 
         <Popover>
@@ -418,7 +586,11 @@ export function StudentReadingPage() {
         <div style={{ display: 'flex', flex: 1, minHeight: 0, justifyContent: 'center' }}>
           <div
             ref={scrollerRef}
-            onScroll={schedulePaint}
+            onScroll={() => {
+              schedulePaint()
+              // The card hangs at fixed viewport coordinates, so scrolling dismisses it
+              setDefinedWord(null)
+            }}
             style={{
               width: '100%',
               maxWidth: `${pageWidth}px`,
@@ -438,41 +610,49 @@ export function StudentReadingPage() {
               while the frontier walks down to mid-frame before the page starts moving */}
           <div style={{ height: `${TOP_GAP_PX}px` }} />
           <div>
-            <div
-              ref={textRef}
-              style={{
-                position: 'sticky',
-                top: `${TOP_GAP_PX}px`,
-                display: 'flex',
-                flexDirection: 'column',
-                gap: spacing.lg,
-                width: '100%',
-                fontFamily: fontFamilies[font].stack,
-                fontSize: `${fontSize}px`,
-                lineHeight: LINE_HEIGHT,
-                color: colors.textPrimary,
-              }}
-            >
-              {PARAGRAPH_WORDS.map((words, paragraphIdx) => (
-                <p key={paragraphIdx}>
-                  {words.map((word, wordIdx) => {
-                    const idx = wordOffsets[paragraphIdx] + wordIdx
-                    return (
-                      <span
-                        key={idx}
-                        ref={(el) => {
-                          wordRefs.current[idx] = el
-                        }}
-                        style={{ opacity: DIM_OPACITY, transition: `opacity ${WORD_TRANSITION_MS}ms linear` }}
-                      >
-                        {word}{' '}
-                      </span>
-                    )
-                  })}
-                </p>
-              ))}
-            </div>
-            <div style={{ height: `${rampPx}px` }} />
+          <div
+            ref={textRef}
+            onDoubleClick={onWordDoubleClick}
+            style={{
+              position: 'sticky',
+              top: `${TOP_GAP_PX}px`,
+              display: 'flex',
+              flexDirection: 'column',
+              gap: spacing.lg,
+              width: '100%',
+              fontFamily: fontFamilies[font].stack,
+              fontSize: `${fontSize}px`,
+              lineHeight: LINE_HEIGHT,
+              color: colors.textPrimary,
+            }}
+          >
+            {PARAGRAPH_WORDS.map((words, paragraphIdx) => (
+              <p key={paragraphIdx}>
+                {words.map((word, wordIdx) => {
+                  const idx = wordOffsets[paragraphIdx] + wordIdx
+                  const isDefined = definedWord?.idx === idx
+                  return (
+                    <span
+                      key={idx}
+                      ref={(el) => {
+                        wordRefs.current[idx] = el
+                      }}
+                      style={{
+                        opacity: isDefined ? 1 : DIM_OPACITY,
+                        transition: `opacity ${WORD_TRANSITION_MS}ms linear`,
+                      }}
+                    >
+                      {/* Chip only the word itself, not its trailing space */}
+                      {isDefined ? <span style={vocabChipStyle}>{word}</span> : word}{' '}
+                    </span>
+                  )
+                })}
+              </p>
+            ))}
+          </div>
+          {/* Sticky travel room: an in-flow spacer (not padding) so the pin has real
+              distance to hold before the wrapper's bottom edge releases the text */}
+          <div style={{ height: `${rampPx}px` }} />
           </div>
           {/* Sized so the last line's bottom edge can cross the locked frontier at max
               scroll, with a line of slack */}
@@ -626,6 +806,8 @@ export function StudentReadingPage() {
           {minutesLeft} min left · {Math.round(progress * 100)}% read
         </div>
       </div>
+
+      {definedWord && <DefinitionPopover word={definedWord.word} x={definedWord.x} y={definedWord.y} />}
     </div>
   )
 }
