@@ -1,4 +1,4 @@
-import { useEffect, useMemo, useRef, useState, type CSSProperties, type PointerEvent as ReactPointerEvent } from 'react'
+import { useEffect, useLayoutEffect, useMemo, useRef, useState, type CSSProperties, type PointerEvent as ReactPointerEvent } from 'react'
 import { useNavigate } from 'react-router-dom'
 import { Popover, PopoverTrigger, PopoverContent, Label, Separator } from '../components/ui'
 import { colors, typography, spacing, radii, shadows } from '../edu-ui/tokens'
@@ -19,12 +19,17 @@ const MAX_PAGE_WIDTH = 900
 
 const LINE_HEIGHT = 1.8
 
+/** Gap above the text, in px — a plain number (not the rem-based spacing token) because
+ *  the sticky pin, the spacer div, and the frontier math must all agree on it exactly */
+const TOP_GAP_PX = 48
+
 /**
- * Scroll-scrubbed focus band (after GSAP's SplitText + ScrollTrigger word-opacity
- * technique): the two lines crossing the middle of the reader sit at full ink,
- * everything above and below drops to DIM_OPACITY. Opacity is recomputed from each
- * word's live position on every scroll frame, so the band is tied to the scroll
- * position exactly like a scrubbed timeline.
+ * Scroll-scrubbed reveal frontier (after GSAP's SplitText + ScrollTrigger word-opacity
+ * technique): everything the reader has scrolled past sits at full ink, everything ahead
+ * at DIM_OPACITY, and within the frontier's own line words light left-to-right so the
+ * reveal is tied to the scroll position exactly like a scrubbed timeline. The page opens
+ * fully dim with the frontier on row 1; a sticky-release ramp holds the text frozen while
+ * the frontier walks down to mid-frame, then the text scrolls beneath the locked frontier.
  */
 const DIM_OPACITY = 0.25
 const WORD_TRANSITION_MS = 180
@@ -79,8 +84,11 @@ export function StudentReadingPage() {
   const [font, setFont] = useState<FontFamily>('georgia')
   const [pageWidth, setPageWidth] = useState(760)
   const [progress, setProgress] = useState(0)
+  // How far the frontier travels before locking mid-frame; doubles as the sticky travel room
+  const [rampPx, setRampPx] = useState(0)
 
   const scrollerRef = useRef<HTMLDivElement>(null)
+  const textRef = useRef<HTMLDivElement>(null)
   const railRef = useRef<HTMLDivElement>(null)
   const wordRefs = useRef<(HTMLSpanElement | null)[]>([])
   const frameRef = useRef<number | undefined>(undefined)
@@ -98,17 +106,36 @@ export function StudentReadingPage() {
 
   const lineHeightPx = fontSize * LINE_HEIGHT
 
-  // Repaint every word's opacity from its live position: exactly the two text lines
-  // nearest the frame's midline are at full ink, every other line is dimmed.
+  // Measure how far the frontier can travel before mid-frame. The layout effect keeps the
+  // sticky travel spacer in sync with the frame before the browser paints the first frame.
+  useLayoutEffect(() => {
+    const measure = () => {
+      const scroller = scrollerRef.current
+      if (scroller) setRampPx(Math.max(0, scroller.clientHeight / 2 - TOP_GAP_PX))
+    }
+    measure()
+    window.addEventListener('resize', measure)
+    return () => window.removeEventListener('resize', measure)
+  }, [])
+
+  // Repaint every word's opacity from its live position: everything behind the reveal
+  // frontier is at full ink, everything ahead is dimmed, and the frontier's own line
+  // fills left-to-right as the scroll advances through it.
   const paint = () => {
     const scroller = scrollerRef.current
     if (!scroller) return
     const rect = scroller.getBoundingClientRect()
-    const centerY = rect.top + rect.height / 2
+    // The frontier rides down with the scroll while the sticky text holds still, then
+    // locks where the sticky releases — the same rampPx, so the hand-off is seamless
+    const focusY = rect.top + Math.min(TOP_GAP_PX + scroller.scrollTop, TOP_GAP_PX + rampPx)
+    const textRect = textRef.current?.getBoundingClientRect()
+    const textLeft = textRect?.left ?? rect.left
+    const textWidth = textRect?.width || 1
 
     // Group words into lines by their rounded vertical centre
     const lineOf: number[] = []
     const lineYs: number[] = []
+    const wordCenterX: number[] = []
     wordRefs.current.forEach((span, i) => {
       if (!span) return
       const r = span.getBoundingClientRect()
@@ -119,22 +146,20 @@ export function StudentReadingPage() {
         lineYs.push(mid)
       }
       lineOf[i] = line
+      wordCenterX[i] = r.left + r.width / 2
     })
 
-    // Keep only lines within a line-height of the midline in play, then take the
-    // two nearest — so far-away text never lights up when the frame is at its ends
-    const focused = new Set(
-      lineYs
-        .map((y, line) => ({ line, d: Math.abs(y - centerY) }))
-        .filter(({ d }) => d <= 2 * lineHeightPx)
-        .sort((a, b) => a.d - b.d)
-        .slice(0, 2)
-        .map(({ line }) => line),
+    // Fraction of each line the frontier has crossed: 1 above it, 0 below, partial within
+    const lineT = lineYs.map((y) =>
+      Math.min(1, Math.max(0, (focusY - (y - lineHeightPx / 2)) / lineHeightPx)),
     )
 
     wordRefs.current.forEach((span, i) => {
       if (!span) return
-      span.style.opacity = focused.has(lineOf[i]) ? '1' : String(DIM_OPACITY)
+      const t = lineT[lineOf[i]]
+      // One shared denominator so the sweep pace is uniform; short last lines finish early
+      const lit = t >= 1 || (t > 0 && (wordCenterX[i] - textLeft) / textWidth <= t)
+      span.style.opacity = lit ? '1' : String(DIM_OPACITY)
     })
 
     const maxScroll = scroller.scrollHeight - scroller.clientHeight
@@ -168,8 +193,8 @@ export function StudentReadingPage() {
         frameRef.current = undefined
       }
     }
-    // Re-run whenever a setting reflows the text
-  }, [font, fontSize, pageWidth])
+    // Re-run whenever a setting reflows the text or the ramp is re-measured
+  }, [font, fontSize, pageWidth, rampPx])
 
   const scrollByLines = (lines: number) => {
     scrollerRef.current?.scrollBy({ top: lines * lineHeightPx, behavior: 'smooth' })
@@ -408,41 +433,50 @@ export function StudentReadingPage() {
               boxShadow: shadows.lg,
             }}
           >
-          {/* A slim top spacer keeps the opening tight; the bottom one lets the
-              last lines still reach the focus band at the frame's midline */}
-          <div style={{ height: `${spacing['2xl']}` }} />
-          <div
-            style={{
-              display: 'flex',
-              flexDirection: 'column',
-              gap: spacing.lg,
-              width: '100%',
-              fontFamily: fontFamilies[font].stack,
-              fontSize: `${fontSize}px`,
-              lineHeight: LINE_HEIGHT,
-              color: colors.textPrimary,
-            }}
-          >
-            {PARAGRAPH_WORDS.map((words, paragraphIdx) => (
-              <p key={paragraphIdx}>
-                {words.map((word, wordIdx) => {
-                  const idx = wordOffsets[paragraphIdx] + wordIdx
-                  return (
-                    <span
-                      key={idx}
-                      ref={(el) => {
-                        wordRefs.current[idx] = el
-                      }}
-                      style={{ opacity: DIM_OPACITY, transition: `opacity ${WORD_TRANSITION_MS}ms linear` }}
-                    >
-                      {word}{' '}
-                    </span>
-                  )
-                })}
-              </p>
-            ))}
+          {/* The text pins under the top gap for the first rampPx of scroll (the in-flow
+              spacer below it is the sticky travel room), so the opening rows hold still
+              while the frontier walks down to mid-frame before the page starts moving */}
+          <div style={{ height: `${TOP_GAP_PX}px` }} />
+          <div>
+            <div
+              ref={textRef}
+              style={{
+                position: 'sticky',
+                top: `${TOP_GAP_PX}px`,
+                display: 'flex',
+                flexDirection: 'column',
+                gap: spacing.lg,
+                width: '100%',
+                fontFamily: fontFamilies[font].stack,
+                fontSize: `${fontSize}px`,
+                lineHeight: LINE_HEIGHT,
+                color: colors.textPrimary,
+              }}
+            >
+              {PARAGRAPH_WORDS.map((words, paragraphIdx) => (
+                <p key={paragraphIdx}>
+                  {words.map((word, wordIdx) => {
+                    const idx = wordOffsets[paragraphIdx] + wordIdx
+                    return (
+                      <span
+                        key={idx}
+                        ref={(el) => {
+                          wordRefs.current[idx] = el
+                        }}
+                        style={{ opacity: DIM_OPACITY, transition: `opacity ${WORD_TRANSITION_MS}ms linear` }}
+                      >
+                        {word}{' '}
+                      </span>
+                    )
+                  })}
+                </p>
+              ))}
+            </div>
+            <div style={{ height: `${rampPx}px` }} />
           </div>
-          <div style={{ height: '50%' }} />
+          {/* Sized so the last line's bottom edge can cross the locked frontier at max
+              scroll, with a line of slack */}
+          <div style={{ height: `calc(50% + ${lineHeightPx}px)` }} />
           </div>
         </div>
 
